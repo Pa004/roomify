@@ -596,4 +596,12 @@
             @apply text-sm text-zinc-500;
         }
     }
+
+    .error-banner {
+        background: #fee2e2;
+        color: #b91c1c;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 12px;
+    }
 }

@@ -9,8 +9,14 @@ import {createProject, getProjects} from "../../lib/puter.action";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "New React Router App" },
-    { name: "description", content: "Welcome to React Router!" },
+    {
+      title: "Roomify | AI Architectural Visualization"
+    },
+    {
+      name: "description",
+      content:
+        "Transform floor plans into realistic AI-generated architectural visualizations."
+    }
   ];
 }
 
@@ -24,7 +30,7 @@ export default function Home() {
 
             if(isCreatingProjectRef.current) return false;
             isCreatingProjectRef.current = true;
-            const newId = Date.now().toString();
+            const newId = crypto.randomUUID();
             const name = `Residence ${newId}`;
 
             const newItem = {

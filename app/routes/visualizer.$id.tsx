@@ -19,6 +19,8 @@ const VisualizerId = () => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [currentImage, setCurrentImage] = useState<string | null>(null);
 
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
     const handleBack = () => navigate('/');
     const handleExport = () => {
         if (!currentImage) return;
@@ -30,6 +32,29 @@ const VisualizerId = () => {
         link.click();
         document.body.removeChild(link);
     }
+
+    const handleShare = async () => {
+        try {
+            const url = window.location.href;
+
+            if (navigator.share) {
+                await navigator.share({
+                    title: project?.name || "Roomify Project",
+                    text: "Check out this AI-generated architectural visualization.",
+                    url,
+                });
+
+                return;
+            }
+
+            await navigator.clipboard.writeText(url);
+
+            alert("Project link copied to clipboard.");
+        } catch (error) {
+            console.error("Share failed:", error);
+            alert("Unable to share the project.");
+        }
+    };
 
     const runGeneration = async (item: DesignItem) => {
         if(!id || !item.sourceImage) return;
@@ -58,7 +83,11 @@ const VisualizerId = () => {
                 }
             }
         } catch (error) {
-            console.error('Generation failed: ', error)
+            console.error("Generation failed:", error);
+
+            setErrorMessage(
+                "Unable to generate the 3D visualization. Please try again."
+            );
         } finally {
             setIsProcessing(false);
         }
@@ -75,12 +104,26 @@ const VisualizerId = () => {
 
             setIsProjectLoading(true);
 
-            const fetchedProject = await getProjectById({ id });
+            try {
+                const fetchedProject = await getProjectById({ id });
 
-            if (!isMounted) return;
+                if (!isMounted) return;
 
-            setProject(fetchedProject);
-            setCurrentImage(fetchedProject?.renderedImage || null);
+                if (!fetchedProject) {
+                    setErrorMessage("Project not found.");
+                    setIsProjectLoading(false);
+                    return;
+                }
+
+                setProject(fetchedProject);
+                setCurrentImage(fetchedProject.renderedImage || null);
+            } catch (error) {
+                console.error("Project loading failed:", error);
+
+                setErrorMessage(
+                    "Unable to load the project. Please refresh the page."
+                );
+            }
             setIsProjectLoading(false);
             hasInitialGenerated.current = false;
         };
@@ -141,12 +184,18 @@ const VisualizerId = () => {
                             >
                                 <Download className="w-4 h-4 mr-2" /> Export
                             </Button>
-                            <Button size="sm" onClick={() => {}} className="share">
+                            <Button size="sm" onClick={handleShare} className="share">
                                 <Share2 className="w-4 h-4 mr-2" />
                                 Share
                             </Button>
                         </div>
                     </div>
+
+                    {errorMessage && (
+                        <div className="error-banner">
+                            {errorMessage}
+                        </div>
+                    )}
 
                     <div className={`render-area ${isProcessing ? 'is-processing': ''}`}>
                         {currentImage ? (
