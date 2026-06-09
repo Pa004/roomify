@@ -60,7 +60,7 @@ The platform provides a simple workflow:
 
 # Screenshots
 
-Add screenshots of the application here.
+![alt text](image.png)
 
 ## Home Page
 
